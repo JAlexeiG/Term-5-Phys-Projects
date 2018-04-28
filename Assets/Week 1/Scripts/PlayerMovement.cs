@@ -9,15 +9,15 @@ public class PlayerMovement : MonoBehaviour {
     [SerializeField]
     private float moveTime;
     private float moveSpeed;
+    [SerializeField]
+    private Transform firstObjectPos;
 
 
     private Transform trans;
     private Rigidbody rb;
-
+    
     [SerializeField]
-    private Transform firstObjectPos;
-    [SerializeField]
-    private float jumpDistance;
+    private float jumpTime;
     //private float jumpSpeed;
 
     private bool grounded;
@@ -29,6 +29,7 @@ public class PlayerMovement : MonoBehaviour {
     //private float xVel;
 
     private Vector3 Accel;
+
     // Use this for initialization
     void Start () {
         trans = GetComponent<Transform>();
@@ -53,37 +54,56 @@ public class PlayerMovement : MonoBehaviour {
             Accel = CalcAccel(moveTime, rb.velocity, distance) * Vector3.forward;
             Debug.Log("Acceleration: " + Accel.magnitude);
             playing = true;
+        }
+        if (playing)
+        {
+            ///// CHANGE EVERYTHING FOR FORCE INSTEAD OF VELOCITY: Base it off of acceleration
 
-            if (playing)
+
+
+            /*
+             // Velocity
+            if (Input.GetKey(KeyCode.A))
             {
-                ///// CHANGE EVERYTHING FOR FORCE INSTEAD OF VELOCITY: Base it off of acceleration
-                
+                xVel = -strafeSpeed;
+            }
+            else if (Input.GetKey(KeyCode.D))
+            {
+                xVel = strafeSpeed;
+            }
+            else
+            {
+                xVel = 0;
+            }
+            
+            if (Input.GetKeyDown(KeyCode.Space) && grounded)
+            {
+                rb.velocity += new Vector3(0, jumpSpeed,0);
+            }
 
+            rb.velocity = new Vector3(xVel, rb.velocity.y, moveSpeed);
 
-                /*
-                 // Velocity
-                if (Input.GetKey(KeyCode.A))
-                {
-                    xVel = -strafeSpeed;
-                }
-                else if (Input.GetKey(KeyCode.D))
-                {
-                    xVel = strafeSpeed;
-                }
-                else
-                {
-                    xVel = 0;
-                }
+            */
 
-                if (Input.GetKeyDown(KeyCode.Space) && grounded)
+            if (Input.GetKey(KeyCode.A))
+            {
+                Debug.Log("Potato");
+                rb.AddForce(-strafeSpeed, 0, 0, ForceMode.Force);
+            }
+            else if (Input.GetKey(KeyCode.D))
+            {
+                if (rb.velocity.x < strafeSpeed)
                 {
-                    rb.velocity += new Vector3(0, jumpSpeed,0);
-                }
+                    rb.AddForce(strafeSpeed, 0, 0, ForceMode.Acceleration);
+                };
+            }
 
-                rb.velocity = new Vector3(xVel, rb.velocity.y, moveSpeed);
-                */
+            if (Input.GetKeyDown(KeyCode.Space) && grounded)
+            {
+                rb.AddForce(0,CalcJumpVel(jumpTime),0,ForceMode.Impulse);
             }
         }
+        
 
     }
     private void FixedUpdate()
@@ -130,6 +150,16 @@ public class PlayerMovement : MonoBehaviour {
         return (((vF.magnitude * vF.magnitude) - (vI.magnitude * vI.magnitude)) / 2.0f * d);
     }
     
+
+    float CalcJumpVel(float t)
+    {
+        if (t < Mathf.Epsilon)
+        {
+            return 0;
+        }
+        
+        return (t*9.8f)/2;
+    }
 
     private void OnCollisionEnter(Collision collision)
     {
